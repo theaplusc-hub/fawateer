@@ -28,6 +28,7 @@
         .profit-box.show { display: block; }
         .profit-line { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px; }
         .profit-note { font-size: 0.72rem; color: #64748B; margin-top: 6px; }
+        .explainer { font-size: 0.82rem; color: #475569; background: #F1F5F9; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -38,13 +39,15 @@
         <button class="lang-btn" id="l-btn" onclick="toggleLanguage()">English</button>
     </div>
 
+    <p class="explainer" id="l-expl">اكتب اسم العميل والمنتجات، واضغط إرسال — هيوصله فاتورة جاهزة على واتساب في ثواني. مجاني تمامًا وبدون تسجيل.</p>
+
     <div class="form-group">
         <label id="l-st">اسم متجرك:</label>
-        <input type="text" id="st">
+        <input type="text" id="st" oninput="saveStoreInfo()">
     </div>
     <div class="form-group">
         <label id="l-pa">حساب إنستاباي / فودافون كاش:</label>
-        <input type="text" id="pa">
+        <input type="text" id="pa" oninput="saveStoreInfo()">
     </div>
 
     <h4 style="margin: 12px 0 6px 0;" id="t-cu">بيانات العميل</h4>
@@ -90,14 +93,26 @@
 <script>
     let lang = 'ar';
     const tx = {
-        en: { t:"🧾 Fawateer", l:"العربية", st:"Store Name:", pa:"InstaPay / Vodafone Cash:", cu:"Customer Details", cn:"Name:", cp:"WhatsApp:", it:"Products", ad:"➕ Add Item", sh:"Shipping (EGP):", sub:"Subtotal:", shi:"Shipping:", tot:"Total:", se:"Send to WhatsApp", pt:"📊 Track My Profit (seller-only, never sent to customer)", pcost:"Cost of goods:", pprofit:"Your profit on this order:", pmonth:"Your total profit this month:", pnote:"These numbers are for you only — never sent with the customer receipt", cur:"EGP", past:"Past months (is it trending up?)", none:"No past months recorded yet", pname:"Product name", pprice:"Price", pcostph:"Cost" },
-        ar: { t:"🧾 فواتير / Fawateer", l:"English", st:"اسم متجرك:", pa:"حساب إنستاباي / فودافون كاش:", cu:"بيانات العميل", cn:"اسم العميل:", cp:"رقم واتساب العميل (مثل 2010...):", it:"المنتجات والطلب", ad:"➕ أضف منتج آخر", sh:"مصاريف الشحن (ج.م):", sub:"المجموع الفرعي:", shi:"الشحن:", tot:"الإجمالي النهائي:", se:"إرسال الفاتورة عبر واتساب", pt:"📊 تتبع أرباحي (يظهر لك فقط، لا يظهر للعميل)", pcost:"تكلفة المنتجات:", pprofit:"ربحك من هذا الطلب:", pmonth:"إجمالي ربحك هذا الشهر:", pnote:"هذه الأرقام تظهر لك فقط ولا تُرسل مع الفاتورة للعميل", cur:"ج.م", past:"الشهور السابقة (هل المبيعات في ازدياد؟)", none:"لا توجد شهور سابقة مسجلة بعد", pname:"اسم المنتج", pprice:"السعر", pcostph:"التكلفة" }
+        en: { t:"🧾 Fawateer", l:"العربية", st:"Store Name:", pa:"InstaPay / Vodafone Cash:", cu:"Customer Details", cn:"Name:", cp:"WhatsApp:", it:"Products", ad:"➕ Add Item", sh:"Shipping (EGP):", sub:"Subtotal:", shi:"Shipping:", tot:"Total:", se:"Send to WhatsApp", pt:"📊 Track My Profit (seller-only, never sent to customer)", pcost:"Cost of goods:", pprofit:"Your profit on this order:", pmonth:"Your total profit this month:", pnote:"These numbers are for you only — never sent with the customer receipt", cur:"EGP", past:"Past months (is it trending up?)", none:"No past months recorded yet", pname:"Product name", pprice:"Price", pcostph:"Cost", expl:"Enter your customer's name and items, tap send — they get a ready-made receipt on WhatsApp in seconds. Completely free, no signup.", mGreet:"Hi", mFrom:"here's your order from", mItem:"Item", mShip:"Shipping:", mTot:"Total:", mPay:"Payment details:", mThanks:"Thank you for your order! 🙏", mFooter:"Sent free via Fawateer — theaplusc-hub.github.io/fawateer", mDefStore:"Store", mDefProd:"Product" },
+        ar: { t:"🧾 فواتير / Fawateer", l:"English", st:"اسم متجرك:", pa:"حساب إنستاباي / فودافون كاش:", cu:"بيانات العميل", cn:"اسم العميل:", cp:"رقم واتساب العميل (مثل 2010...):", it:"المنتجات والطلب", ad:"➕ أضف منتج آخر", sh:"مصاريف الشحن (ج.م):", sub:"المجموع الفرعي:", shi:"الشحن:", tot:"الإجمالي النهائي:", se:"إرسال الفاتورة عبر واتساب", pt:"📊 تتبع أرباحي (يظهر لك فقط، لا يظهر للعميل)", pcost:"تكلفة المنتجات:", pprofit:"ربحك من هذا الطلب:", pmonth:"إجمالي ربحك هذا الشهر:", pnote:"هذه الأرقام تظهر لك فقط ولا تُرسل مع الفاتورة للعميل", cur:"ج.م", past:"الشهور السابقة (هل المبيعات في ازدياد؟)", none:"لا توجد شهور سابقة مسجلة بعد", pname:"اسم المنتج", pprice:"السعر", pcostph:"التكلفة", expl:"اكتب اسم العميل والمنتجات، واضغط إرسال — هيوصله فاتورة جاهزة على واتساب في ثواني. مجاني تمامًا وبدون تسجيل.", mGreet:"مرحبًا", mFrom:"إليك طلبك من", mItem:"المنتج", mShip:"الشحن:", mTot:"الإجمالي:", mPay:"تفاصيل الدفع:", mThanks:"شكرًا لطلبك! 🙏", mFooter:"تم الإرسال مجانًا عبر Fawateer — theaplusc-hub.github.io/fawateer", mDefStore:"المتجر", mDefProd:"منتج" }
     };
     const monthNames = {
         en: ["January","February","March","April","May","June","July","August","September","October","November","December"],
         ar: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
     };
     let profitMode = false;
+
+    function loadStoreInfo() {
+        const savedName = localStorage.getItem('fawateerStoreName');
+        const savedHandle = localStorage.getItem('fawateerPaymentHandle');
+        if (savedName) document.getElementById('st').value = savedName;
+        if (savedHandle) document.getElementById('pa').value = savedHandle;
+    }
+
+    function saveStoreInfo() {
+        localStorage.setItem('fawateerStoreName', document.getElementById('st').value);
+        localStorage.setItem('fawateerPaymentHandle', document.getElementById('pa').value);
+    }
 
     function toggleLanguage() {
         lang = (lang === 'ar') ? 'en' : 'ar';
@@ -123,6 +138,7 @@
         document.getElementById('l-pmonth').innerText = tx[lang].pmonth;
         document.getElementById('l-pnote').innerText = tx[lang].pnote;
         document.getElementById('l-past').innerText = tx[lang].past;
+        document.getElementById('l-expl').innerText = tx[lang].expl;
         document.querySelectorAll('.cur-unit').forEach(el => el.innerText = tx[lang].cur);
         document.querySelectorAll('.i-n').forEach(el => el.placeholder = tx[lang].pname);
         document.querySelectorAll('.i-p').forEach(el => el.placeholder = tx[lang].pprice);
@@ -231,23 +247,34 @@
             return;
         }
 
+        const t = tx[lang];
+        const storeName = document.getElementById('st').value || t.mDefStore;
+        const customerName = document.getElementById('cn').value;
+        const today = new Date();
+        const dateStr = today.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB');
+
         let itemText = "";
+        let i = 1;
         document.querySelectorAll('.it-row').forEach(function(r) {
-            const name = r.querySelector('.i-n').value || "منتج";
+            const name = r.querySelector('.i-n').value || t.mDefProd;
             const qty = r.querySelector('.i-q').value || 1;
             const price = r.querySelector('.i-p').value || 0;
-            itemText += "• " + name + " (x" + qty + ") -> " + (qty * price) + " EGP\n";
+            itemText += i + ". " + name + " (x" + qty + ") — " + (qty * price) + " EGP\n";
+            i++;
         });
 
-        let message = "🧾 *FAWATEER / فواتير*\n";
-        message += "متجر: *" + (document.getElementById('st').value || "Store") + "*\n";
+        let message = "🧾 *" + storeName + "*\n";
+        message += (customerName ? (t.mGreet + " " + customerName + ", ") : (t.mGreet + ", ")) + t.mFrom + " " + storeName + " (" + dateStr + "):\n";
         message += "----------------------------------\n" + itemText + "----------------------------------\n";
-        message += "الشحن: " + document.getElementById('sh').value + " EGP\n";
-        message += "الإجمالي: " + document.getElementById('v-tot').innerText + " EGP\n\n";
+        message += t.mShip + " " + (document.getElementById('sh').value || 0) + " EGP\n";
+        message += "*" + t.mTot + " " + document.getElementById('v-tot').innerText + " EGP*\n\n";
 
         if (document.getElementById('pa').value) {
-            message += "💡 تفاصيل الدفع:\n" + document.getElementById('pa').value + "\n";
+            message += "💡 " + t.mPay + "\n" + document.getElementById('pa').value + "\n\n";
         }
+
+        message += t.mThanks + "\n\n";
+        message += "_" + t.mFooter + "_";
 
         // This is the correct WhatsApp deep-link format — wa.me + numeric phone + URL-encoded text
         const url = "https://wa.me/" + cleanPhone + "?text=" + encodeURIComponent(message);
@@ -270,6 +297,7 @@
     }
 
     addItemRow();
+    loadStoreInfo();
 </script>
 </body>
 </html>
