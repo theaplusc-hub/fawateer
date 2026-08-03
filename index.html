@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fawateer App</title>
+    <style>
+        :root { --primary: #25D366; --dark: #1E293B; --light: #F8FAFC; --border: #CBD5E1; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: var(--light); color: var(--dark); padding: 15px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 450px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .lang-btn { background: var(--dark); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.85rem; }
+        input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.95rem; }
+        .it-row { display: flex; gap: 6px; margin-bottom: 8px; }
+        .add-btn { background: #3B82F6; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin: 5px 0; }
+        .total-box { background: var(--light); padding: 12px; border-radius: 8px; margin-top: 15px; }
+        .total-line { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem; }
+        .send-submit { display: block; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 1.05rem; font-weight: bold; width: 100%; margin-top: 15px; cursor: pointer; }
+        .send-submit:hover { background: #128C7E; }
+        .i-c { display: none; }
+        .container.profit-mode .i-c { display: block; }
+        .profit-toggle { background: none; border: 1px dashed var(--border); color: #64748B; padding: 8px; border-radius: 6px; cursor: pointer; width: 100%; font-size: 0.8rem; margin-bottom: 10px; }
+        .profit-box { display: none; background: #ECFDF5; border: 1px solid #A7F3D0; padding: 12px; border-radius: 8px; margin-top: 10px; }
+        .profit-box.show { display: block; }
+        .profit-line { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 4px; }
+        .profit-note { font-size: 0.72rem; color: #64748B; margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h3 id="t">🧾 فواتير / Fawateer</h3>
+        <button class="lang-btn" id="l-btn" onclick="toggleLanguage()">English</button>
+    </div>
+
+    <div class="form-group">
+        <label id="l-st">اسم متجرك:</label>
+        <input type="text" id="st">
+    </div>
+    <div class="form-group">
+        <label id="l-pa">حساب إنستاباي / فودافون كاش:</label>
+        <input type="text" id="pa">
+    </div>
+
+    <h4 style="margin: 12px 0 6px 0;" id="t-cu">بيانات العميل</h4>
+    <div class="form-group">
+        <label id="l-cn">اسم العميل:</label>
+        <input type="text" id="cn">
+    </div>
+    <div class="form-group">
+        <label id="l-cp">رقم واتساب العميل (مثال 2010...):</label>
+        <input type="text" id="cp" placeholder="2010xxxxxxxx">
+    </div>
+
+    <h4 style="margin: 12px 0 6px 0;" id="t-it">المنتجات والطلب</h4>
+    <button type="button" class="profit-toggle" id="b-pt" onclick="toggleProfitMode()">📊 تتبع أرباحي (يظهر لك فقط، لا يظهر للعميل)</button>
+    <div id="it-c"></div>
+    <button class="add-btn" id="b-ad" onclick="addItemRow()">➕ أضف منتج آخر</button>
+
+    <div class="form-group">
+        <label id="l-sh">مصاريف الشحن (ج.م):</label>
+        <input type="number" id="sh" value="0" oninput="calc()">
+    </div>
+
+    <div class="total-box">
+        <div class="total-line"><span id="l-sub">المجموع الفرعي:</span> <span><span id="v-sub">0</span> <span class="cur-unit">ج.م</span></span></div>
+        <div class="total-line"><span id="l-shi">الشحن:</span> <span><span id="v-shi">0</span> <span class="cur-unit">ج.م</span></span></div>
+        <div class="total-line" style="font-weight:bold; border-top:1px solid #CBD5E1; padding-top:4px;"><span id="l-tot">الإجمالي النهائي:</span> <span><span id="v-tot">0</span> <span class="cur-unit">ج.م</span></span></div>
+    </div>
+
+    <div class="profit-box" id="profit-box">
+        <div class="profit-line"><span id="l-pcost">تكلفة المنتجات:</span> <span><span id="v-pcost">0</span> <span class="cur-unit">ج.م</span></span></div>
+        <div class="profit-line" style="font-weight:bold;"><span id="l-pprofit">ربحك من هذا الطلب:</span> <span><span id="v-pprofit">0</span> <span class="cur-unit">ج.م</span></span></div>
+        <div class="profit-line" style="border-top:1px solid #A7F3D0; padding-top:4px;"><span id="l-pmonth">إجمالي ربحك هذا الشهر:</span> <span><span id="v-pmonth">0</span> <span class="cur-unit">ج.م</span></span></div>
+        <div class="profit-note" id="l-pnote">هذه الأرقام تظهر لك فقط ولا تُرسل مع الفاتورة للعميل</div>
+        <div style="margin-top:10px; border-top:1px solid #A7F3D0; padding-top:8px;">
+            <div class="profit-note" id="l-past" style="font-weight:bold; color:#334155;">الشهور السابقة (هل المبيعات في ازدياد؟)</div>
+            <div id="past-months"></div>
+        </div>
+    </div>
+
+    <button type="button" class="send-submit" id="b-se" onclick="sendToWhatsapp()">إرسال الفاتورة عبر واتساب</button>
+</div>
+
+<script>
+    let lang = 'ar';
+    const tx = {
+        en: { t:"🧾 Fawateer", l:"العربية", st:"Store Name:", pa:"InstaPay / Vodafone Cash:", cu:"Customer Details", cn:"Name:", cp:"WhatsApp:", it:"Products", ad:"➕ Add Item", sh:"Shipping (EGP):", sub:"Subtotal:", shi:"Shipping:", tot:"Total:", se:"Send to WhatsApp", pt:"📊 Track My Profit (seller-only, never sent to customer)", pcost:"Cost of goods:", pprofit:"Your profit on this order:", pmonth:"Your total profit this month:", pnote:"These numbers are for you only — never sent with the customer receipt", cur:"EGP", past:"Past months (is it trending up?)", none:"No past months recorded yet", pname:"Product name", pprice:"Price", pcostph:"Cost" },
+        ar: { t:"🧾 فواتير / Fawateer", l:"English", st:"اسم متجرك:", pa:"حساب إنستاباي / فودافون كاش:", cu:"بيانات العميل", cn:"اسم العميل:", cp:"رقم واتساب العميل (مثل 2010...):", it:"المنتجات والطلب", ad:"➕ أضف منتج آخر", sh:"مصاريف الشحن (ج.م):", sub:"المجموع الفرعي:", shi:"الشحن:", tot:"الإجمالي النهائي:", se:"إرسال الفاتورة عبر واتساب", pt:"📊 تتبع أرباحي (يظهر لك فقط، لا يظهر للعميل)", pcost:"تكلفة المنتجات:", pprofit:"ربحك من هذا الطلب:", pmonth:"إجمالي ربحك هذا الشهر:", pnote:"هذه الأرقام تظهر لك فقط ولا تُرسل مع الفاتورة للعميل", cur:"ج.م", past:"الشهور السابقة (هل المبيعات في ازدياد؟)", none:"لا توجد شهور سابقة مسجلة بعد", pname:"اسم المنتج", pprice:"السعر", pcostph:"التكلفة" }
+    };
+    const monthNames = {
+        en: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+        ar: ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"]
+    };
+    let profitMode = false;
+
+    function toggleLanguage() {
+        lang = (lang === 'ar') ? 'en' : 'ar';
+        const isAr = (lang === 'ar');
+        document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+        document.getElementById('l-btn').innerText = tx[lang].l;
+        document.getElementById('t').innerText = tx[lang].t;
+        document.getElementById('l-st').innerText = tx[lang].st;
+        document.getElementById('l-pa').innerText = tx[lang].pa;
+        document.getElementById('t-cu').innerText = tx[lang].cu;
+        document.getElementById('l-cn').innerText = tx[lang].cn;
+        document.getElementById('l-cp').innerText = tx[lang].cp;
+        document.getElementById('t-it').innerText = tx[lang].it;
+        document.getElementById('b-ad').innerText = tx[lang].ad;
+        document.getElementById('l-sh').innerText = tx[lang].sh;
+        document.getElementById('l-sub').innerText = tx[lang].sub;
+        document.getElementById('l-shi').innerText = tx[lang].shi;
+        document.getElementById('l-tot').innerText = tx[lang].tot;
+        document.getElementById('b-se').innerText = tx[lang].se;
+        document.getElementById('b-pt').innerText = tx[lang].pt;
+        document.getElementById('l-pcost').innerText = tx[lang].pcost;
+        document.getElementById('l-pprofit').innerText = tx[lang].pprofit;
+        document.getElementById('l-pmonth').innerText = tx[lang].pmonth;
+        document.getElementById('l-pnote').innerText = tx[lang].pnote;
+        document.getElementById('l-past').innerText = tx[lang].past;
+        document.querySelectorAll('.cur-unit').forEach(el => el.innerText = tx[lang].cur);
+        document.querySelectorAll('.i-n').forEach(el => el.placeholder = tx[lang].pname);
+        document.querySelectorAll('.i-p').forEach(el => el.placeholder = tx[lang].pprice);
+        document.querySelectorAll('.i-c').forEach(el => el.placeholder = tx[lang].pcostph);
+        renderPastMonths();
+    }
+
+    function toggleProfitMode() {
+        profitMode = !profitMode;
+        document.querySelector('.container').classList.toggle('profit-mode', profitMode);
+        document.getElementById('profit-box').classList.toggle('show', profitMode);
+        calc();
+        renderPastMonths();
+    }
+
+    function getMonthlyProfitTotal() {
+        const history = JSON.parse(localStorage.getItem('fawateerProfitHistory') || '[]');
+        const now = new Date();
+        const thisMonth = now.getFullYear() + '-' + now.getMonth();
+        return history
+            .filter(r => r.month === thisMonth)
+            .reduce((sum, r) => sum + r.profit, 0);
+    }
+
+    function getMonthlyBreakdown() {
+        const history = JSON.parse(localStorage.getItem('fawateerProfitHistory') || '[]');
+        const now = new Date();
+        const thisMonth = now.getFullYear() + '-' + now.getMonth();
+        const totals = {};
+        history.forEach(r => {
+            if (r.month === thisMonth) return; // current month shown separately above
+            totals[r.month] = (totals[r.month] || 0) + r.profit;
+        });
+        return Object.keys(totals)
+            .map(key => {
+                const [year, monthIdx] = key.split('-').map(Number);
+                return { key, year, monthIdx, total: totals[key] };
+            })
+            .sort((a, b) => (b.year - a.year) || (b.monthIdx - a.monthIdx))
+            .slice(0, 6);
+    }
+
+    function renderPastMonths() {
+        const el = document.getElementById('past-months');
+        const rows = getMonthlyBreakdown();
+        if (rows.length === 0) {
+            el.innerHTML = `<div class="profit-note">${tx[lang].none}</div>`;
+            return;
+        }
+        el.innerHTML = rows.map(r =>
+            `<div class="profit-line"><span>${monthNames[lang][r.monthIdx]} ${r.year}</span><span>${r.total} ${tx[lang].cur}</span></div>`
+        ).join('');
+    }
+
+    function saveProfitRecord(profit, cost, revenue) {
+        const history = JSON.parse(localStorage.getItem('fawateerProfitHistory') || '[]');
+        const now = new Date();
+        history.push({ date: now.toISOString(), month: now.getFullYear() + '-' + now.getMonth(), profit, cost, revenue });
+        localStorage.setItem('fawateerProfitHistory', JSON.stringify(history));
+    }
+
+    function addItemRow() {
+        const c = document.getElementById('it-c');
+        const r = document.createElement('div');
+        r.className = 'it-row';
+        r.innerHTML = `
+            <input type="text" class="i-n" style="flex:2;" placeholder="${tx[lang].pname}">
+            <input type="number" class="i-q" style="flex:0.5; text-align:center;" value="1" oninput="calc()">
+            <input type="number" class="i-p" style="flex:1;" placeholder="${tx[lang].pprice}" oninput="calc()">
+            <input type="number" class="i-c" style="flex:1;" placeholder="${tx[lang].pcostph}" oninput="calc()">
+            <button type="button" style="background:#EF4444; color:white; padding:0 10px; border:none; border-radius:6px; cursor:pointer;" onclick="this.parentElement.remove(); calc();">❌</button>
+        `;
+        c.appendChild(r);
+        calc();
+    }
+
+    function calc() {
+        let sub = 0;
+        let costTotal = 0;
+        document.querySelectorAll('.it-row').forEach(r => {
+            const q = parseFloat(r.querySelector('.i-q').value) || 0;
+            const p = parseFloat(r.querySelector('.i-p').value) || 0;
+            const c = parseFloat(r.querySelector('.i-c').value) || 0;
+            sub += (q * p);
+            costTotal += (q * c);
+        });
+        const shipping = parseFloat(document.getElementById('sh').value) || 0;
+        document.getElementById('v-sub').innerText = sub;
+        document.getElementById('v-shi').innerText = shipping;
+        document.getElementById('v-tot').innerText = sub + shipping;
+
+        if (profitMode) {
+            const orderProfit = sub - costTotal;
+            document.getElementById('v-pcost').innerText = costTotal;
+            document.getElementById('v-pprofit').innerText = orderProfit;
+            document.getElementById('v-pmonth').innerText = getMonthlyProfitTotal();
+        }
+    }
+
+    function sendToWhatsapp() {
+        const rawPhone = document.getElementById('cp').value;
+        const cleanPhone = rawPhone.replace(/\D/g, '');
+
+        if (!cleanPhone) {
+            alert(lang === 'ar' ? "برجاء إدخال رقم هاتف صحيح" : "Please enter a valid phone number");
+            return;
+        }
+
+        let itemText = "";
+        document.querySelectorAll('.it-row').forEach(function(r) {
+            const name = r.querySelector('.i-n').value || "منتج";
+            const qty = r.querySelector('.i-q').value || 1;
+            const price = r.querySelector('.i-p').value || 0;
+            itemText += "• " + name + " (x" + qty + ") -> " + (qty * price) + " EGP\n";
+        });
+
+        let message = "🧾 *FAWATEER / فواتير*\n";
+        message += "متجر: *" + (document.getElementById('st').value || "Store") + "*\n";
+        message += "----------------------------------\n" + itemText + "----------------------------------\n";
+        message += "الشحن: " + document.getElementById('sh').value + " EGP\n";
+        message += "الإجمالي: " + document.getElementById('v-tot').innerText + " EGP\n\n";
+
+        if (document.getElementById('pa').value) {
+            message += "💡 تفاصيل الدفع:\n" + document.getElementById('pa').value + "\n";
+        }
+
+        // This is the correct WhatsApp deep-link format — wa.me + numeric phone + URL-encoded text
+        const url = "https://wa.me/" + cleanPhone + "?text=" + encodeURIComponent(message);
+        window.open(url, "_blank");
+
+        // Seller-only profit record — never included in the customer-facing message above
+        if (profitMode) {
+            let costTotal = 0, revenueTotal = 0;
+            document.querySelectorAll('.it-row').forEach(r => {
+                const q = parseFloat(r.querySelector('.i-q').value) || 0;
+                const p = parseFloat(r.querySelector('.i-p').value) || 0;
+                const c = parseFloat(r.querySelector('.i-c').value) || 0;
+                revenueTotal += (q * p);
+                costTotal += (q * c);
+            });
+            saveProfitRecord(revenueTotal - costTotal, costTotal, revenueTotal);
+            document.getElementById('v-pmonth').innerText = getMonthlyProfitTotal();
+            renderPastMonths();
+        }
+    }
+
+    addItemRow();
+</script>
+</body>
+</html>
